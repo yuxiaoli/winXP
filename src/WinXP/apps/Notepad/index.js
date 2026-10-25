@@ -5,7 +5,16 @@ import { WindowDropDowns } from 'components';
 import dropDownData from './dropDownData';
 
 export default function Notepad({ onClose }) {
-  const [docText, setDocText] = useState('');
+  const [docText, setDocText] = useState(
+    'Hello, I’m Sean — Yuxiao Li.\n\n' +
+      'At Vector Index, I build developer tools, cloud services\n' +
+      'and AI applications.\n\n' +
+      'My work spans full-stack engineering, Industrial IoT and\n' +
+      'international technology collaboration.\n\n' +
+      'Explore my work: https://vectorindex.cloud\n' +
+      'Public projects: https://github.com/yuxiaoli\n\n' +
+      'Welcome to my little corner of the web. Make yourself at home.\n',
+  );
   const [wordWrap, setWordWrap] = useState(false);
 
   function onClickOptionItem(item) {

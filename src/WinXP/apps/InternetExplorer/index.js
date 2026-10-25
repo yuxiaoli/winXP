@@ -21,10 +21,11 @@ import refresh from 'assets/windowsIcons/refresh.png';
 import stop from 'assets/windowsIcons/stop.png';
 import windows from 'assets/windowsIcons/windows.png';
 import dropdown from 'assets/windowsIcons/dropdown.png';
+import StartPage from './StartPage';
 
 function InternetExplorer({ onClose }) {
   const [state, setState] = useState({
-    route: 'main',
+    route: 'home',
     query: '',
   });
   function onSearch(str) {
@@ -37,7 +38,7 @@ function InternetExplorer({ onClose }) {
   }
   function goMain() {
     setState({
-      route: 'main',
+      route: 'home',
       query: '',
     });
   }
@@ -69,7 +70,7 @@ function InternetExplorer({ onClose }) {
         <div
           onClick={goMain}
           className={`ie__function_bar__button${
-            state.route === 'main' ? '--disable' : ''
+            state.route === 'home' ? '--disable' : ''
           }`}
         >
           <img className="ie__function_bar__icon" src={back} alt="" />
@@ -90,11 +91,14 @@ function InternetExplorer({ onClose }) {
             alt=""
           />
         </div>
-        <div className="ie__function_bar__button" onClick={goMain}>
+        <div className="ie__function_bar__button" onClick={goMain} title="Home">
           <img className="ie__function_bar__icon--margin-1" src={home} alt="" />
         </div>
         <div className="ie__function_bar__separate" />
-        <div className="ie__function_bar__button">
+        <div
+          className="ie__function_bar__button"
+          onClick={() => setState({ route: 'main', query: '' })}
+        >
           <img
             className="ie__function_bar__icon--normalize "
             src={search}
@@ -137,11 +141,13 @@ function InternetExplorer({ onClose }) {
         <div className="ie__address_bar__content">
           <img src={ie} alt="ie" className="ie__address_bar__content__img" />
           <div className="ie__address_bar__content__text">
-            {`https://www.google.com.tw${
-              state.route === 'search'
-                ? `/search?q=${encodeURIComponent(state.query)}`
-                : ''
-            }`}
+            {state.route === 'home'
+              ? 'about:home — Sean / Vector Index'
+              : `https://www.google.com.tw${
+                  state.route === 'search'
+                    ? `/search?q=${encodeURIComponent(state.query)}`
+                    : ''
+                }`}
           </div>
           <img
             src={dropdown}
@@ -165,12 +171,18 @@ function InternetExplorer({ onClose }) {
       </section>
       <div className="ie__content">
         <div className="ie__content__inner">
-          <Google
-            route={state.route}
-            query={state.query}
-            onSearch={onSearch}
-            goMain={goMain}
-          />
+          {state.route === 'home' ? (
+            <StartPage
+              onSearchDemo={() => setState({ route: 'main', query: '' })}
+            />
+          ) : (
+            <Google
+              route={state.route}
+              query={state.query}
+              onSearch={onSearch}
+              goMain={goMain}
+            />
+          )}
         </div>
       </div>
       <footer className="ie__footer">
@@ -400,8 +412,7 @@ const Div = styled.div`
   }
   .ie__content__inner {
     position: relative;
-    min-height: 800px;
-    min-width: 800px;
+    min-height: 100%;
     width: 100%;
     height: 100%;
   }
