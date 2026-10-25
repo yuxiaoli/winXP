@@ -16,7 +16,7 @@
 3. [x] Update Start menu identity, My Computer profile links, browser start page, metadata and Notepad bundled introductory text. Keep classic apps and the search demo available.
 4. [x] Validate the browser route behavior with a failing test before implementation and a passing test afterward. Lint: zero errors, four pre-existing anonymous-export warnings. Frozen Yarn dependency installation succeeded without changing the lockfile.
 5. [x] Complete production build and local browser checks. Start menu identity, My Computer links and Notepad introduction were inspected in Chrome. Browser home/search/Home round-trip passes the behavior test. Production build succeeds with existing dependency/source-map and lint warnings; CI-mode build rejects those existing warnings. Retained the original external wallpaper URL and added a classic blue fallback because its host was unavailable in the verification browser.
-6. [ ] Review diff, check concurrent branch movement, commit and push only `develop`. Verify exact remote source SHA and unchanged `master`.
+6. [x] Review diff, check concurrent branch movement, commit and push only `develop`. Verified `ced4c218fa20307a4b36460188850597849eea7b` on remote `develop` and unchanged `master`. The final publication also restores the existing Pages favicon into `public/favicon.ico` so builds retain the owner's deployed icon.
 7. [ ] Publish generated artifacts from that exact source to the existing `gh-pages` branch without force pushing, verify Pages workflow success and test the actual public desktop: Start menu identity, browser links/search/Home, My Computer links, Notepad editing, and retained classic apps.
 
 ## Verified public references
@@ -28,4 +28,4 @@
 
 ## Current status
 
-Implementation is local and tests pass; publication and final live acceptance remain pending. The existing `gh-pages` baseline is `b7c765a314cc3453f23f1a56b7ab4a73a7b63632`. Update this plan when the remaining checks have real evidence.
+Implementation is pushed and tests pass; publication and final live acceptance remain pending. The existing `gh-pages` baseline is `b7c765a314cc3453f23f1a56b7ab4a73a7b63632`. Preserve its auxiliary favicon files and publish incrementally. Local Chrome also verified edited Notepad text survives the Word Wrap action. Update this plan when the remaining checks have real evidence.
