@@ -23,6 +23,7 @@ import cd from 'assets/windowsIcons/111(48x48).png';
 import dropdown from 'assets/windowsIcons/dropdown.png';
 import pullup from 'assets/windowsIcons/pullup.png';
 import logo from 'assets/github-logo.png';
+import ie from 'assets/windowsIcons/ie.png';
 import mine from 'assets/minesweeper/mine-icon.png';
 import windows from 'assets/windowsIcons/windows.png';
 
@@ -223,7 +224,7 @@ function MyComputer({ onClose }) {
                   <iframe
                     title="ghbtn"
                     style={{ margin: '0 0 3px -1px', height: '30px' }}
-                    src="https://ghbtns.com/github-btn.html?user=ShizukuIchi&repo=winXP&type=star&count=true&size=large"
+                    src="https://ghbtns.com/github-btn.html?user=yuxiaoli&repo=winXP&type=star&count=true&size=large"
                     frameBorder="0"
                     scrolling="0"
                     width="170px"
@@ -233,16 +234,16 @@ function MyComputer({ onClose }) {
                 <div className="com__content__left__card__row">
                   <img
                     className="com__content__left__card__img"
-                    src="https://cdn.iconscout.com/icon/free/png-256/medium-1425876-1205067.png"
+                    src={ie}
                     alt="control"
                   />
                   <a
-                    href="https://medium.com/@ShizukuIchi"
+                    href="https://vectorindex.cloud"
                     target="_blank"
                     rel="noreferrer"
                     className="com__content__left__card__text link"
                   >
-                    Medium
+                    Vector Index
                   </a>
                 </div>
                 <div className="com__content__left__card__row">
@@ -289,7 +290,7 @@ function MyComputer({ onClose }) {
                   />
                   <div className="com__content__right__card__img-container">
                     <div className="com__content__right__card__text">
-                      User's Documents
+                      Sean's Documents
                     </div>
                   </div>
                 </div>
@@ -335,11 +336,11 @@ function MyComputer({ onClose }) {
             </div>
             <div className="com__content__right__card com__content__right__card--me">
               <div className="com__content__right__card__header">
-                About Me :)
+                About Sean / Yuxiao Li
               </div>
               <div className="com__content__right__card__content">
                 <a
-                  href="https://github.com/ShizukuIchi"
+                  href="https://github.com/yuxiaoli"
                   target="_blank"
                   rel="noreferrer"
                   className="com__content__right__card__item--me"
@@ -352,18 +353,18 @@ function MyComputer({ onClose }) {
                   <div className="com__content__right__card__text">Github</div>
                 </a>
                 <a
-                  href="https://sh1zuku.csie.io"
+                  href="https://vectorindex.cloud"
                   target="_blank"
                   rel="noreferrer"
                   className="com__content__right__card__item--me"
                 >
                   <img
                     className="com__content__right__card__img"
-                    src="https://a.ppy.sh/2926513_1448497605.png"
-                    alt="control"
+                    src={ie}
+                    alt="website"
                   />
                   <div className="com__content__right__card__text">
-                    My Website
+                    Vector Index
                   </div>
                 </a>
               </div>
