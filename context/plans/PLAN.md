@@ -17,7 +17,7 @@
 4. [x] Validate the browser route behavior with a failing test before implementation and a passing test afterward. Lint: zero errors, four pre-existing anonymous-export warnings. Frozen Yarn dependency installation succeeded without changing the lockfile.
 5. [x] Complete production build and local browser checks. Start menu identity, My Computer links and Notepad introduction were inspected in Chrome. Browser home/search/Home round-trip passes the behavior test. Production build succeeds with existing dependency/source-map and lint warnings; CI-mode build rejects those existing warnings. Retained the original external wallpaper URL and added a classic blue fallback because its host was unavailable in the verification browser.
 6. [x] Review diff, check concurrent branch movement, commit and push only `develop`. Verified `ced4c218fa20307a4b36460188850597849eea7b` on remote `develop` and unchanged `master`. The final publication also restores the existing Pages favicon into `public/favicon.ico` so builds retain the owner's deployed icon.
-7. [ ] Publish generated artifacts from that exact source to the existing `gh-pages` branch without force pushing, verify Pages workflow success and test the actual public desktop: Start menu identity, browser links/search/Home, My Computer links, Notepad editing, and retained classic apps.
+7. [x] Publish generated artifacts from that exact source to the existing `gh-pages` branch without force pushing, verify Pages workflow success and test the actual public desktop: Start menu identity, browser links/search/Home, My Computer links and Notepad editing. See evidence and limits below.
 
 ## Verified public references
 
@@ -28,4 +28,20 @@
 
 ## Current status
 
-Implementation is pushed and tests pass; publication and final live acceptance remain pending. The existing `gh-pages` baseline is `b7c765a314cc3453f23f1a56b7ab4a73a7b63632`. Preserve its auxiliary favicon files and publish incrementally. Local Chrome also verified edited Notepad text survives the Word Wrap action. Update this plan when the remaining checks have real evidence.
+The requested personalization is pushed, deployed and verified at the original public URL. The existing `gh-pages` baseline was `b7c765a314cc3453f23f1a56b7ab4a73a7b63632`; publication preserved its auxiliary favicon files and existing branch integration.
+
+### Publication evidence
+
+- Tested source: `28eeedcdead6e9f7542e3ed4458000bdc6baee91` on `develop`.
+- Generated artifact commit: `3c124025356f8f003019823772ccae378d3eb2c3` on `gh-pages`, copied byte for byte from the production build.
+- Pages workflow: [40202843231](https://github.com/yuxiaoli/winXP/actions/runs/40202843231), completed successfully for that artifact commit.
+- Live [deployment metadata](https://yuxiaoli.github.io/winXP/deployment.json) returned the expected source SHA; the main JavaScript returned HTTP 200. Each publication's metadata identifies its exact source commit, including documentation closeouts.
+- Live Chrome verified the personal browser start page, correct Vector Index/GitHub/fork links, search-demo query and Home round-trip, Start menu Sean, My Computer profile, and Notepad introduction/editing. Typed Notepad text remained intact when Word Wrap was toggled.
+- Existing Winamp playlist rendered; Minesweeper reset produced the standard 81-cell board. No claims of comprehensive game or audio playback testing.
+- Upstream license, package author, app credits and genuine upstream Minesweeper link remain unchanged. No email, private CV file or unsupported contact claim was published.
+
+### Remaining limits
+
+- The existing Paint `https://jspaint.app` iframe opened as a grey window in the verification browser, including one reopen. The same public service loaded correctly as a top-level tab and returned HTTP 200 with no X-Frame-Options or Content-Security-Policy header. The underlying embedding cause is unconfirmed; the integration is unchanged and full embedded drawing functionality is not verified. No security policy was weakened.
+- Existing build warnings remain: four anonymous-default-export lint warnings, Webamp's absent bundled source map, old Browserslist data, and bundle size. Normal production build succeeds; setting `CI=true` treats the existing lint warnings as build errors.
+- One escalated read-only `git ls-remote` request timed out during automatic approval before execution. It was not retried; the connector supplied the branch snapshot instead. Source and artifact pushes later succeeded normally without force, and `master` stayed unchanged.
