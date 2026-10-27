@@ -1,5 +1,22 @@
 # WinXP personal desktop update — 2026-10-25
 
+## Active rollout — canonical welcome, 2026-10-27
+
+Scope: replace only Notepad's previous new-window state seed with the exact approved welcome from DOT_NOTES `projects/repos/boot-loader/welcome.md` at `bb681b8fd0085af3cc15ef02e6da1b955404e5ce`. Preserve every word and all six paragraphs, including `Keep exploring`. Canonical text is 525 UTF-8 bytes, no trailing newline, Git blob `fe7e9edba1d4cbbe07d44e43dea42bd5e3f234b7`, SHA256 `8CFADE6F56F8046D1A2DEAE329E43D3F024095917D18DC11E436B095D9C9FB36`.
+
+Starting state: local and remote `develop` both `bad58e397d12f006f84dbbec841ca9db6fa5135e`; remote default is `develop`; `master` remains `856bb554b3667f62078010b4cee10cc2645761e1`. Both the source checkout and existing `winXP-pages` publication worktree are clean. Work branch: `feature/canonical-welcome-20261027`, based on the verified latest develop.
+
+Constraints: no `main`/`master` writes, force push, credentials/security changes, browser control or other repository edits. Preserve the existing public URL, MIT license, upstream/Webamp/JS Paint credits and disabled New/Open/Save behavior. Notepad has no persisted document model or saved-file input parameter; introduce none. Preserve edited and empty mounted documents; do not access or clear browser storage. Keep the existing `winXP-pages` worktree intact and publish through a separate generated-artifact checkout.
+
+1. [x] Verify canonical bytes, current source/default/cache refs and clean worktrees; record this plan before implementation.
+2. [x] Replace only the bundled state seed. Add noninteractive DOM regression coverage for exact default equality, edited/empty text preservation across rerenders and independent new windows.
+3. [x] Run the unchanged existing test plus the new Notepad DOM test: two suites/two tests pass. The new test first failed on the previous 363-byte introduction, then passed on the approved 525-byte value. Lint passes with zero errors/four existing warnings. Production build passes with the documented existing Webamp source-map, lint, Browserslist and bundle-size warnings. Parsed source and minified build ASTs each contain exactly one actual welcome `useState` initializer, byte-for-byte equal to the canonical copy (six paragraphs, approved SHA256). Substantive diff review confirms no storage, file-input, menu, license or credit changes. No CUA/Edge/Chrome/Playwright used; rendered/device appearance remains untested.
+4. [ ] Push the isolated feature branch and open a draft PR to `develop`; send PR/head/check evidence to the parent. Wait for the parent's independent diff review before marking ready or ordinary merge. This is an agent review gate, not a new user permission request.
+5. [ ] After review and required platform checks permit, merge normally with expected-head protection; build the exact merged `develop` revision and publish through the existing `gh-pages` integration at the unchanged URL.
+6. [ ] Verify Pages success, source/deployment refs and exact served compiled default via noninteractive DOM/HTTP evidence. Report limitations explicitly and retain evidence. Do not claim browser/device acceptance.
+
+Status: implementation and noninteractive checks complete. Merge remains gated on the draft PR's independent parent review and required platform checks. Publication/live-copy acceptance remains pending. Historical personalization evidence below is retained and is not evidence of this rollout's completion.
+
 ## Scope and constraints
 
 - Verified target: `yuxiaoli/winXP`, fork of `ShizukuIchi/winXP`.
