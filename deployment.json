@@ -1,6 +1,6 @@
 {
   "sourceRepository": "yuxiaoli/winXP",
-  "sourceCommit": "bad58e397d12f006f84dbbec841ca9db6fa5135e",
-  "assetManifestSha256": "4BE64DD09FF268CC4F41CA1D1EE3940660F82A8B891DA7187B0E8C19902117C2",
-  "sourceBranch": "develop"
+  "sourceBranch": "develop",
+  "assetManifestSha256": "3EDDFDB8AB66585E18250641925744244421415E3279E9340607249BE5974EA5",
+  "sourceCommit": "4a945de7bce21bf25f3f21d40d6888bf61fb941e"
 }
