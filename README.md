@@ -25,6 +25,8 @@ Use the existing Yarn lockfile: `corepack yarn@1.22.22 install --frozen-lockfile
 Run `npm test -- --watchAll=false --runInBand`, then `npm run build`.
 The build uses the existing `/winXP/` Pages base path. Publish only generated `build/` files from the verified `develop` commit to `gh-pages`; the public URL remains unchanged.
 
+Before committing a publication, use Node 18+ to run `node scripts/prune-obsolete-pages.cjs <publication-worktree>` from this source checkout. The target must be an isolated `publish/` worktree of this fork. The default is a dry run; add `--apply` after reviewing its two-file allowlist to stage index-only removals of the verified obsolete JS/map. It refuses referenced assets, changed blob fingerprints or edited local target bytes, preserves all other assets, and never deletes files or Git history. Stage build files BEFORE pruning; do not run a broad `git add` afterward, which could reintroduce retained local copies. An index-only publication checkout avoids materializing these old files; otherwise they remain locally untracked after commit and are reported by path only. Run metadata-only tests with `node --test scripts/prune-obsolete-pages.test.cjs`. Existing publication worktrees, historical Git/PR copies, CDN caches and prior downloads remain outside this policy's cleanup scope.
+
 The browser start page and Notepad introduction are bundled defaults. They do not read, erase or migrate browser storage. Notepad in this recreation does not persist documents between closed windows.
 
 ## Contributing
