@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import useElementResize from './useElementResize';
@@ -7,15 +7,30 @@ const defaultOffset = { x: 100, y: 100 };
 const defaultSize = { width: 400, height: 300 };
 const boundary = { top: 1, right: 999, bottom: 699, left: 1 };
 
-function WindowFixture({ resizable = true, bounds = boundary }) {
+function WindowFixture({
+  resizable = true,
+  bounds = boundary,
+  fitToViewport = false,
+  visible = true,
+  initialOffset = defaultOffset,
+  initialSize = defaultSize,
+  measuredSize,
+}) {
   const ref = useRef(null);
   const dragRef = useRef(null);
+  useLayoutEffect(() => {
+    if (measuredSize) {
+      ref.current.getBoundingClientRect = () => ({ ...measuredSize });
+    }
+  }, [measuredSize]);
   const { offset, size } = useElementResize(ref, {
     dragRef,
-    defaultOffset,
-    defaultSize,
+    defaultOffset: initialOffset,
+    defaultSize: initialSize,
     boundary: bounds,
     resizable,
+    fitToViewport,
+    visible,
   });
   return (
     <div ref={ref} data-window data-geometry={JSON.stringify({ offset, size })}>
@@ -37,14 +52,16 @@ describe('window drag and resize lifecycle', () => {
     });
     target = container.querySelector('[data-window]');
     header = target.querySelector('header');
-    target.getBoundingClientRect = () => ({
-      left: 100,
-      top: 100,
-      width: 400,
-      height: 300,
-      right: 500,
-      bottom: 400,
-    });
+    if (!props.measuredSize) {
+      target.getBoundingClientRect = () => ({
+        left: 100,
+        top: 100,
+        width: 400,
+        height: 300,
+        right: 500,
+        bottom: 400,
+      });
+    }
   }
 
   function mouse(element, type, x, y, options = {}) {
@@ -311,5 +328,190 @@ describe('window drag and resize lifecycle', () => {
     mouse(window, 'mousemove', 210, 122);
     mouse(window, 'mouseup', 210, 122);
     expect(geometry().offset).toEqual({ x: 110, y: 110 });
+  });
+
+  describe('optional viewport fitting', () => {
+    const wide = { top: 1, left: 1, right: 1199, bottom: 799 };
+    const narrow = { top: 1, left: 1, right: 601, bottom: 469 };
+    const initialOffset = { x: 250, y: 40 };
+    const initialSize = { width: 660, height: 500 };
+    const fitProps = { fitToViewport: true, initialOffset, initialSize };
+
+    function mount(props) {
+      act(() => {
+        ReactDOM.unmountComponentAtNode(container);
+      });
+      render(props);
+    }
+
+    it('fits existing normal geometry after a narrow viewport change', () => {
+      mount({ ...fitProps, bounds: wide });
+      expect(geometry()).toEqual({ offset: initialOffset, size: initialSize });
+      render({ ...fitProps, bounds: narrow });
+      expect(geometry()).toEqual({
+        offset: { x: 1, y: 1 },
+        size: { width: 600, height: 468 },
+      });
+      expect(covers()).toHaveLength(0);
+    });
+
+    it('fits a new window immediately and stays stable through shrink/grow cycles', () => {
+      mount({ ...fitProps, bounds: narrow });
+      const fitted = geometry();
+      expect(fitted).toEqual({
+        offset: { x: 1, y: 1 },
+        size: { width: 600, height: 468 },
+      });
+      render({ ...fitProps, bounds: wide });
+      expect(geometry()).toEqual(fitted);
+      render({ ...fitProps, bounds: narrow });
+      expect(geometry()).toEqual(fitted);
+    });
+
+    it('starts the next drag from fitted geometry without normalizing every movement', () => {
+      mount({ ...fitProps, bounds: wide });
+      render({ ...fitProps, bounds: narrow });
+      mouse(header, 'mousedown', 100, 12);
+      mouse(window, 'mousemove', 120, 32);
+      mouse(window, 'mouseup', 120, 32);
+      expect(geometry()).toEqual({
+        offset: { x: 21, y: 21 },
+        size: { width: 600, height: 468 },
+      });
+      render({ ...fitProps, bounds: { ...narrow } });
+      expect(geometry().offset).toEqual({ x: 21, y: 21 });
+    });
+
+    it('cancels an active gesture and fits the latest geometry on viewport change', () => {
+      mount({ ...fitProps, bounds: wide });
+      mouse(header, 'mousedown', 300, 50);
+      mouse(window, 'mousemove', 330, 80);
+      expect(covers()).toHaveLength(1);
+      render({ ...fitProps, bounds: narrow });
+      const fitted = geometry();
+      expect(fitted.offset).toEqual({ x: 1, y: 1 });
+      expect(covers()).toHaveLength(0);
+      mouse(window, 'mousemove', 400, 100);
+      expect(geometry()).toEqual(fitted);
+    });
+
+    it('fits stored restore geometry independently of maximized or hidden DOM sizing', () => {
+      mount({ ...fitProps, bounds: wide });
+      render({
+        ...fitProps,
+        bounds: narrow,
+        measuredSize: { width: 608, height: 476 },
+      });
+      const fitted = geometry();
+      expect(fitted.size).toEqual({ width: 600, height: 468 });
+      expect(fitted.offset).toEqual({ x: 1, y: 1 });
+      render({
+        ...fitProps,
+        bounds: { ...narrow, right: 501 },
+        measuredSize: { width: 0, height: 0 },
+      });
+      expect(geometry()).toEqual({
+        offset: { x: 1, y: 1 },
+        size: { width: 500, height: 468 },
+      });
+    });
+
+    it('repositions intrinsic windows without assigning fixed dimensions', () => {
+      const props = {
+        fitToViewport: true,
+        resizable: false,
+        initialOffset: { x: 700, y: 500 },
+        initialSize: { width: 0, height: 0 },
+        measuredSize: { width: 280, height: 320 },
+      };
+      mount({ ...props, bounds: wide });
+      render({ ...props, bounds: narrow });
+      expect(geometry()).toEqual({
+        offset: { x: 321, y: 149 },
+        size: { width: 0, height: 0 },
+      });
+    });
+
+    it('retains the last measured intrinsic dimensions while a window is hidden', () => {
+      const props = {
+        fitToViewport: true,
+        resizable: false,
+        initialOffset: { x: 700, y: 500 },
+        initialSize: { width: 0, height: 0 },
+      };
+      mount({
+        ...props,
+        bounds: wide,
+        measuredSize: { width: 280, height: 320 },
+      });
+      render({
+        ...props,
+        bounds: narrow,
+        visible: false,
+        measuredSize: { width: 0, height: 0 },
+      });
+      expect(geometry().offset).toEqual({ x: 321, y: 149 });
+      expect(geometry().size).toEqual({ width: 0, height: 0 });
+    });
+
+    it('remeasures intrinsic windows on restore even when the boundaries have not changed', () => {
+      const props = {
+        fitToViewport: true,
+        resizable: false,
+        initialOffset: { x: 700, y: 500 },
+        initialSize: { width: 0, height: 0 },
+        bounds: narrow,
+      };
+      mount({
+        ...props,
+        visible: false,
+        measuredSize: { width: 0, height: 0 },
+      });
+      render({
+        ...props,
+        visible: true,
+        measuredSize: { width: 280, height: 320 },
+      });
+      expect(geometry()).toEqual({
+        offset: { x: 321, y: 149 },
+        size: { width: 0, height: 0 },
+      });
+    });
+
+    it('keeps resize minimums within very small viewports after fitting', () => {
+      mount({
+        ...fitProps,
+        bounds: { top: 1, left: 1, right: 149, bottom: 149 },
+        measuredSize: { top: 1, left: 1, width: 148, height: 148 },
+      });
+      expect(geometry().size).toEqual({ width: 148, height: 148 });
+      mouse(target, 'mousedown', 148, 148);
+      mouse(window, 'mousemove', 100, 100);
+      mouse(window, 'mouseup', 100, 100);
+      expect(geometry().size).toEqual({ width: 148, height: 148 });
+    });
+
+    it('keeps right-side controls and the titlebar reachable for oversized fixed windows', () => {
+      mount({ ...fitProps, resizable: false, bounds: narrow });
+      expect(geometry()).toEqual({
+        offset: { x: -59, y: 1 },
+        size: initialSize,
+      });
+    });
+
+    it('leaves opt-out windows unchanged when the viewport shrinks', () => {
+      mount({ initialOffset, initialSize, bounds: wide });
+      render({ initialOffset, initialSize, bounds: narrow });
+      expect(geometry()).toEqual({ offset: initialOffset, size: initialSize });
+    });
+
+    it('ignores temporarily invalid viewport measurements', () => {
+      mount({ ...fitProps, bounds: wide });
+      render({
+        ...fitProps,
+        bounds: { top: 1, left: 1, right: -1, bottom: -31 },
+      });
+      expect(geometry()).toEqual({ offset: initialOffset, size: initialSize });
+    });
   });
 });

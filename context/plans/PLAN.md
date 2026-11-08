@@ -1,5 +1,16 @@
 # WinXP personal desktop update — 2026-10-25
 
+## Active viewport follow-up — 2026-11-08
+
+Live QA of the click repair found a separate inherited problem: shrinking an existing session from a 1168px viewport to 602px preserves wide nonmaximized window dimensions and offsets, moving Close outside the visible screen. Fresh narrow startup already auto-maximizes correctly. Continue on `fix/keep-window-controls-visible-20261108` from exact merged source `dde7600` under the same reviewed publication approval.
+
+Bounded change: opt normal XP windows into fitting their saved geometry on viewport/visibility changes. Resize explicit resizable dimensions only when necessary and reposition intrinsic-sized windows without changing their sizing model. Keep state synchronized for the next drag, preserve document contents, and exempt Winamp's independent window system. No browser permissions, security settings, upstream cache, or unrelated app changes.
+
+1. [x] Add an integration regression for an existing minimized window, viewport shrink, restore and Close. It fails against the first repair (400px remains instead of fitting to 318px).
+2. [x] Implemented opt-in viewport fitting, hidden intrinsic-size caching and restore remeasurement, stored normal geometry, invalid-dimension guards and viewport-aware resize minimums. Added 12 focused viewport cases plus the actual Windows integration regression. Full suite: 47/47 Jest tests and 4/4 publication-policy tests pass; lint has zero errors/four existing warnings; production build passes with existing warnings.
+3. [ ] Run full tests, lint/build and independent review, then publish through draft PR/develop/gh-pages with exact content and expected-head checks.
+4. [ ] Recheck shrink/grow/restore/drag and Close in live Chrome, preserve Notepad text and recheck primary click flows. Record physical-device limits.
+
 ## Active click repair — 2026-11-08
 
 Request: investigate and fix unreliable initial-window Close and Start interactions, regardless of whether inherited upstream or introduced by personalization. Work on `fix/window-click-lifecycle-20261108` from `develop` `567eafa`; preserve read-only `master`, current Pages URL, user text, branding and third-party integrations.
@@ -10,8 +21,8 @@ Evidence: upstream HEAD and fork master are both `856bb554b3667f62078010b4cee10c
 2. [x] Add failing-before regressions for interrupted drag/resize cleanup, normal geometry, explicit control activation without prior mouse focus, repeated Start open/close and outside dismissal.
 3. [x] Repair lifecycle and activation while preserving desktop styling and existing apps. Keep mouse drag support; do not claim touch dragging or a complete accessibility rewrite.
 4. [x] Automated checks: 34/34 Jest tests and 4/4 publication-policy tests pass. The original code fails 19 of these Jest tests (15 pass). Lint has zero errors/four existing warnings. Normal production build succeeds with the existing Webamp source-map, Browserslist and bundle-size warnings. Local preview cannot be reached from the browser, so rendered acceptance is deferred to the exact live publication. DevTools device emulation is unavailable; do not claim physical mobile/touch validation.
-5. [ ] Publish isolated draft PR to develop, obtain independent diff review, satisfy platform checks and merge through the existing process. Build the exact merged source and publish generated artifacts to gh-pages without force or removing unrelated existing assets.
-6. [ ] Verify remote refs, Pages result, exact live asset parity and browser click flows. Record untested physical-device behavior distinctly.
+5. [x] PR #3 independently reviewed and merged to develop `dde7600c160308c440e20f3b9232d64edfee16a3`; exact-source build published as `8ede184eb3f5a4ad41572fcff60110ae885aaf09`. Pages workflow 42450737282 succeeded, and all 17 generated files (5,042,911 bytes) matched live byte for byte. Master remained unchanged.
+6. [x] Live Chrome passed first-click background Close, Enter/Space controls, nonprimary Close rejection, repeated Start and outside/Escape dismissal, Notepad edit/minimize/restore, title double-click and drag/resize followed by controls, iframe-region crossing, and fresh narrow startup. Physical touch, interruption during a held native gesture, and exhaustive iframe combinations remain unverified. Shrinking an already-open session exposed the separate geometry issue covered below.
 
 ## Active privacy follow-up — obsolete published assets, 2026-10-27
 

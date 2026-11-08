@@ -9,10 +9,13 @@ function useElementResize(ref, options) {
     resizable = true,
     resizeThreshold = 10,
     constraintSize = 200,
+    fitToViewport = false,
+    visible = true,
   } = options;
   const [offset, setOffset] = useState(defaultOffset);
   const [size, setSize] = useState(defaultSize);
   const geometry = useRef({ offset, size });
+  const measuredSize = useRef({ width: 0, height: 0 });
   const { top, right, bottom, left } = boundary;
 
   useEffect(() => {
@@ -52,6 +55,23 @@ function useElementResize(ref, options) {
       if (document.hidden) finish();
     }
 
+    function applyGeometry({ offset: nextOffset, size: nextSize }) {
+      const current = geometry.current;
+      geometry.current = { offset: nextOffset, size: nextSize };
+      if (
+        nextOffset.x !== current.offset.x ||
+        nextOffset.y !== current.offset.y
+      ) {
+        setOffset(nextOffset);
+      }
+      if (
+        nextSize.width !== current.size.width ||
+        nextSize.height !== current.size.height
+      ) {
+        setSize(nextSize);
+      }
+    }
+
     function updateGeometry(e) {
       const { pageX, pageY } = getComputedPagePosition(e, gesture.boundary);
       const dx = pageX - gesture.x;
@@ -67,20 +87,7 @@ function useElementResize(ref, options) {
         if (gesture.horizontal < 0) nextOffset.x += dx;
         if (gesture.vertical < 0) nextOffset.y += dy;
       }
-      const current = geometry.current;
-      geometry.current = { offset: nextOffset, size: nextSize };
-      if (
-        nextOffset.x !== current.offset.x ||
-        nextOffset.y !== current.offset.y
-      ) {
-        setOffset(nextOffset);
-      }
-      if (
-        nextSize.width !== current.size.width ||
-        nextSize.height !== current.size.height
-      ) {
-        setSize(nextSize);
-      }
+      applyGeometry({ offset: nextOffset, size: nextSize });
     }
 
     function onMove(e) {
@@ -112,15 +119,23 @@ function useElementResize(ref, options) {
       const vertical = /top/i.test(mode) ? -1 : /bottom/i.test(mode) ? 1 : 0;
       const limits = { top, right, bottom, left };
       const current = geometry.current;
+      const minimumWidth =
+        fitToViewport && right > left
+          ? Math.min(constraintSize, right - left)
+          : constraintSize;
+      const minimumHeight =
+        fitToViewport && bottom > top
+          ? Math.min(constraintSize, bottom - top)
+          : constraintSize;
       if (horizontal < 0) {
-        limits.right = e.pageX + current.size.width - constraintSize;
+        limits.right = e.pageX + current.size.width - minimumWidth;
       } else if (horizontal > 0) {
-        limits.left = e.pageX - current.size.width + constraintSize;
+        limits.left = e.pageX - current.size.width + minimumWidth;
       }
       if (vertical < 0) {
-        limits.bottom = e.pageY + current.size.height - constraintSize;
+        limits.bottom = e.pageY + current.size.height - minimumHeight;
       } else if (vertical > 0) {
-        limits.top = e.pageY - current.size.height + constraintSize;
+        limits.top = e.pageY - current.size.height + minimumHeight;
       }
       gesture = {
         mode,
@@ -160,6 +175,25 @@ function useElementResize(ref, options) {
       if (!gesture) target.style.cursor = previousCursor;
     }
 
+    // Run only when the desktop/options change, never on ordinary drag updates.
+    // Explicit sizes describe the normal restore geometry even when the DOM is
+    // maximized. Intrinsic windows keep their sizing and are measured on restore.
+    if (fitToViewport) {
+      if (visible) {
+        const measured = target.getBoundingClientRect();
+        if (measured.width > 0) measuredSize.current.width = measured.width;
+        if (measured.height > 0) measuredSize.current.height = measured.height;
+      }
+      applyGeometry(
+        getFittedGeometry(
+          geometry.current,
+          { top, right, bottom, left },
+          resizable,
+          measuredSize.current,
+        ),
+      );
+    }
+
     target.addEventListener('mousedown', onMouseDown);
     target.addEventListener('mousemove', onHover);
     target.addEventListener('mouseleave', onHoverEnd);
@@ -179,8 +213,40 @@ function useElementResize(ref, options) {
     resizable,
     resizeThreshold,
     constraintSize,
+    fitToViewport,
+    visible,
   ]);
   return { offset, size };
+}
+
+function getFittedGeometry(current, boundary, resizable, measuredSize) {
+  const { top, right, bottom, left } = boundary;
+  const availableWidth = right - left;
+  const availableHeight = bottom - top;
+  if (
+    ![top, right, bottom, left].every(Number.isFinite) ||
+    availableWidth <= 0 ||
+    availableHeight <= 0
+  ) {
+    return current;
+  }
+  const size = { ...current.size };
+  if (resizable) {
+    if (size.width > 0) size.width = Math.min(size.width, availableWidth);
+    if (size.height > 0) size.height = Math.min(size.height, availableHeight);
+  }
+  const width = size.width > 0 ? size.width : measuredSize.width;
+  const height = size.height > 0 ? size.height : measuredSize.height;
+  return {
+    size,
+    offset: {
+      // Fixed/intrinsic windows may be wider than the screen. Keep their right
+      // edge (and Close control) visible rather than forcing a fixed width.
+      x: Math.min(Math.max(current.offset.x, left), right - width),
+      // If the content is too tall, keep the titlebar above the taskbar.
+      y: Math.max(top, Math.min(current.offset.y, bottom - height)),
+    },
+  };
 }
 
 function getResizePosition(e, target, threshold) {
