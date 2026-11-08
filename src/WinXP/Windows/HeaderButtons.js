@@ -13,25 +13,32 @@ function HeaderButtons({
   const buttonElements = {
     minimize: (
       <button
+        type="button"
+        aria-label="Minimize"
         key="minimize"
         className="header__button header__button--minimize"
-        onMouseUp={onMinimize}
+        onClick={onMinimize}
       />
     ),
     maximize: (
       <button
+        type="button"
+        aria-label={maximized ? 'Restore' : 'Maximize'}
+        disabled={!resizable}
         key="maximize"
         className={`header__button ${
           maximized ? 'header__button--maximized' : 'header__button--maximize'
         } ${resizable ? '' : 'header__button--disable'}`}
-        onMouseUp={onMaximize}
+        onClick={onMaximize}
       />
     ),
     close: (
       <button
+        type="button"
+        aria-label="Close"
         key="button"
         className="header__button header__button--close"
-        onMouseUp={onClose}
+        onClick={onClose}
       />
     ),
   };

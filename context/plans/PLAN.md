@@ -1,5 +1,18 @@
 # WinXP personal desktop update — 2026-10-25
 
+## Active click repair — 2026-11-08
+
+Request: investigate and fix unreliable initial-window Close and Start interactions, regardless of whether inherited upstream or introduced by personalization. Work on `fix/window-click-lifecycle-20261108` from `develop` `567eafa`; preserve read-only `master`, current Pages URL, user text, branding and third-party integrations.
+
+Evidence: upstream HEAD and fork master are both `856bb554b3667f62078010b4cee10cc2645761e1`; the window controls, drag/resize hook and taskbar event code are unchanged from that upstream revision. Live Chrome ordinary startup clicks work in this run, but Enter on Close does nothing and right-click on Close closes the window. The hook has viewport-wide shields that only clear on mouseup/unmount and can survive a lost release or focus interruption. No permanent startup overlay is claimed.
+
+1. [x] Read project conventions, identify public deployment and compare upstream interaction code.
+2. [x] Add failing-before regressions for interrupted drag/resize cleanup, normal geometry, explicit control activation without prior mouse focus, repeated Start open/close and outside dismissal.
+3. [x] Repair lifecycle and activation while preserving desktop styling and existing apps. Keep mouse drag support; do not claim touch dragging or a complete accessibility rewrite.
+4. [x] Automated checks: 34/34 Jest tests and 4/4 publication-policy tests pass. The original code fails 19 of these Jest tests (15 pass). Lint has zero errors/four existing warnings. Normal production build succeeds with the existing Webamp source-map, Browserslist and bundle-size warnings. Local preview cannot be reached from the browser, so rendered acceptance is deferred to the exact live publication. DevTools device emulation is unavailable; do not claim physical mobile/touch validation.
+5. [ ] Publish isolated draft PR to develop, obtain independent diff review, satisfy platform checks and merge through the existing process. Build the exact merged source and publish generated artifacts to gh-pages without force or removing unrelated existing assets.
+6. [ ] Verify remote refs, Pages result, exact live asset parity and browser click flows. Record untested physical-device behavior distinctly.
+
 ## Active privacy follow-up — obsolete published assets, 2026-10-27
 
 Scope: remove exactly two obsolete welcome-bearing files from the CURRENT `gh-pages` tip through an ordinary recoverable publication commit: `static/js/main.fd1ef8b7.js` (blob `bd06a3e3863512a87f37c613a3654a4b550a9cc7`) and `static/js/main.fd1ef8b7.js.map` (blob `0b0913b186a7f22a8e7e75564faa308f4399145f`). Keep the current `main.9230efc1.js`, canonical welcome, unrelated IE StartPage/profile content, all other referenced assets, credits and licenses. Record fingerprints/metadata only; do not copy the obsolete biography into fixtures, reports or PR text.

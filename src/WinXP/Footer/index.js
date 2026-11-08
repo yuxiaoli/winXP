@@ -36,6 +36,7 @@ function Footer({
   const [time, setTime] = useState(getTime);
   const [menuOn, setMenuOn] = useState(false);
   const menu = useRef(null);
+  const start = useRef(null);
   function toggleMenu() {
     setMenuOn(on => !on);
   }
@@ -57,25 +58,40 @@ function Footer({
   useEffect(() => {
     const target = menu.current;
     if (!target) return;
-    function onMouseDown(e) {
-      if (!target.contains(e.target) && menuOn) setMenuOn(false);
+    function onPointerDown(e) {
+      if (!target.contains(e.target) && !start.current.contains(e.target)) {
+        setMenuOn(false);
+      }
     }
-    window.addEventListener('mousedown', onMouseDown);
-    return () => window.removeEventListener('mousedown', onMouseDown);
+    function onKeyDown(e) {
+      if (e.key === 'Escape') setMenuOn(false);
+    }
+    if (!menuOn) return;
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [menuOn]);
 
   return (
     <Container onMouseDown={_onMouseDown}>
       <div className="footer__items left">
-        <div ref={menu} className="footer__start__menu">
+        <div ref={menu} id="start-menu" className="footer__start__menu">
           {menuOn && <FooterMenu onClick={_onClickMenuItem} />}
         </div>
-        <img
-          src={startButton}
-          alt="start"
+        <button
+          ref={start}
+          type="button"
+          aria-label="Start"
+          aria-expanded={menuOn}
+          aria-controls="start-menu"
           className="footer__start"
-          onMouseDown={toggleMenu}
-        />
+          onClick={toggleMenu}
+        >
+          <img src={startButton} alt="" draggable={false} />
+        </button>
         {[...apps].map(
           app =>
             !app.header.noFooterWindow && (
@@ -109,13 +125,14 @@ function FooterWindow({ id, icon, title, onMouseDown, isFocus }) {
     onMouseDown(id);
   }
   return (
-    <div
-      onMouseDown={_onMouseDown}
+    <button
+      type="button"
+      onClick={_onMouseDown}
       className={`footer__window ${isFocus ? 'focus' : 'cover'}`}
     >
       <img className="footer__icon" src={icon} alt={title} />
       <div className="footer__text">{title}</div>
-    </div>
+    </button>
   );
 }
 
@@ -178,14 +195,21 @@ const Container = styled.footer`
     align-items: center;
   }
   .footer__start {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    flex-shrink: 0;
     height: 100%;
     margin-right: 10px;
     position: relative;
+    img {
+      display: block;
+      height: 100%;
+    }
     &:hover {
       filter: brightness(105%);
     }
     &:active {
-      pointer-events: none;
       filter: brightness(85%);
     }
   }
@@ -196,6 +220,10 @@ const Container = styled.footer`
     bottom: 100%;
   }
   .footer__window {
+    border: 0;
+    text-align: left;
+    font-family: inherit;
+    min-width: 0;
     flex: 1;
     max-width: 150px;
     color: #fff;
