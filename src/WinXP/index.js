@@ -67,7 +67,6 @@ const reducer = (state, action = { type: '' }) => {
         focusing: FOCUSING.WINDOW,
       };
     case DEL_APP:
-      if (state.focusing !== FOCUSING.WINDOW) return state;
       return {
         ...state,
         apps: state.apps.filter(app => app.id !== action.payload),
@@ -92,7 +91,6 @@ const reducer = (state, action = { type: '' }) => {
       };
     }
     case MINIMIZE_APP: {
-      if (state.focusing !== FOCUSING.WINDOW) return state;
       const apps = state.apps.map(app =>
         app.id === action.payload ? { ...app, minimized: true } : app,
       );
@@ -103,7 +101,6 @@ const reducer = (state, action = { type: '' }) => {
       };
     }
     case TOGGLE_MAXIMIZE_APP: {
-      if (state.focusing !== FOCUSING.WINDOW) return state;
       const apps = state.apps.map(app =>
         app.id === action.payload ? { ...app, maximized: !app.maximized } : app,
       );
@@ -181,30 +178,18 @@ function WinXP() {
   const onFocusApp = useCallback(id => {
     dispatch({ type: FOCUS_APP, payload: id });
   }, []);
-  const onMaximizeWindow = useCallback(
-    id => {
-      if (focusedAppId === id) {
-        dispatch({ type: TOGGLE_MAXIMIZE_APP, payload: id });
-      }
-    },
-    [focusedAppId],
-  );
-  const onMinimizeWindow = useCallback(
-    id => {
-      if (focusedAppId === id) {
-        dispatch({ type: MINIMIZE_APP, payload: id });
-      }
-    },
-    [focusedAppId],
-  );
-  const onCloseApp = useCallback(
-    id => {
-      if (focusedAppId === id) {
-        dispatch({ type: DEL_APP, payload: id });
-      }
-    },
-    [focusedAppId],
-  );
+  // Explicit control activation must not depend on a preceding mouse-down.
+  // Keyboard, touch and assistive clicks can target an unfocused window.
+  const onMaximizeWindow = useCallback(id => {
+    dispatch({ type: FOCUS_APP, payload: id });
+    dispatch({ type: TOGGLE_MAXIMIZE_APP, payload: id });
+  }, []);
+  const onMinimizeWindow = useCallback(id => {
+    dispatch({ type: MINIMIZE_APP, payload: id });
+  }, []);
+  const onCloseApp = useCallback(id => {
+    dispatch({ type: DEL_APP, payload: id });
+  }, []);
   function onMouseDownFooterApp(id) {
     if (focusedAppId === id) {
       dispatch({ type: MINIMIZE_APP, payload: id });
