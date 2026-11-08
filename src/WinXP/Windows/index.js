@@ -44,6 +44,7 @@ const Window = memo(function({
   defaultOffset,
   resizable,
   maximized,
+  minimized,
   component,
   zIndex,
   isFocus,
@@ -79,6 +80,8 @@ const Window = memo(function({
       left: 1,
     },
     resizable,
+    fitToViewport: !header.invisible,
+    visible: !minimized,
     resizeThreshold: 10,
   });
   let width, height, x, y;

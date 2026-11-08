@@ -71,3 +71,38 @@ it('honors explicit window controls after desktop focus or on a background windo
     container.remove();
   }
 });
+
+it('keeps existing and restored window controls inside a smaller viewport', () => {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const originalWidth = window.innerWidth;
+  const originalHeight = window.innerHeight;
+  try {
+    act(() => {
+      ReactDOM.render(<WinXP />, container);
+    });
+    const headers = Array.from(container.querySelectorAll('.app__header'));
+    act(() => headers[1].querySelector('.header__button--minimize').click());
+    act(() => {
+      window.innerWidth = 320;
+      window.innerHeight = 240;
+      window.dispatchEvent(new Event('resize'));
+    });
+    headers.forEach(header => {
+      expect(header.parentElement.style.width).toBe('318px');
+      expect(header.parentElement.style.height).toBe('208px');
+      expect(header.parentElement.style.transform).toBe('translate(1px,1px)');
+    });
+    act(() => container.querySelectorAll('.footer__window')[1].click());
+    expect(getComputedStyle(headers[1].parentElement).display).toBe('flex');
+    act(() => headers[1].querySelector('.header__button--close').click());
+    expect(container.querySelectorAll('.app__header')).toHaveLength(1);
+  } finally {
+    act(() => {
+      ReactDOM.unmountComponentAtNode(container);
+      window.innerWidth = originalWidth;
+      window.innerHeight = originalHeight;
+    });
+    container.remove();
+  }
+});
